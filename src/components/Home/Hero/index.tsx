@@ -1,9 +1,46 @@
+"use client";
 import React from "react";
+import { useEffect, useState } from "react";
 import HeroCarousel from "./HeroCarousel";
 import HeroFeature from "./HeroFeature";
 import Image from "next/image";
 
+interface bannerRight {
+  caption: string;
+  original_price: string;
+  discounted_price: string;
+  image: string;
+}
+
+
 const Hero = () => {
+   const [bannerfields,setBannerFields] = useState<bannerRight[]>([]);
+   useEffect(() => {
+       const fetchBannerFields = async () => {
+         try {
+           const res = await fetch(
+             "http://localhost/next-woo-backend/wp-json/wp/v2/pages/2"
+           );
+           const data = await res.json();
+           const acf = data.acf;
+   
+           const bannerData: bannerRight[] = [
+             acf.banner_right_top ,
+             acf.banner_right_bottom ,
+            
+           ];
+           
+           setBannerFields(bannerData);
+           
+         } catch (err) {
+           console.error("Error fetching promos:", err);
+         }
+       };
+   
+       fetchBannerFields();
+      
+     }, []);
+     
   return (
     <section className="overflow-hidden pb-10 lg:pb-12.5 xl:pb-15 pt-57.5 sm:pt-45 lg:pt-30 xl:pt-51.5 bg-[#E5EAF4]">
       <div className="max-w-[1170px] w-full mx-auto px-4 sm:px-8 xl:px-0">
@@ -25,11 +62,13 @@ const Hero = () => {
 
           <div className="xl:max-w-[393px] w-full">
             <div className="flex flex-col sm:flex-row xl:flex-col gap-5">
-              <div className="w-full relative rounded-[10px] bg-white p-4 sm:p-7.5">
+                {bannerfields.map((bannerfield, index) => (
+              <div className="w-full relative rounded-[10px] bg-white p-4 sm:p-7.5" key={index}>
                 <div className="flex items-center gap-14">
                   <div>
                     <h2 className="max-w-[153px] font-semibold text-dark text-xl mb-20">
-                      <a href="#"> iPhone 14 Plus & 14 Pro Max </a>
+                      <a href="#"> {bannerfield.caption} </a>
+
                     </h2>
 
                     <div>
@@ -38,10 +77,10 @@ const Hero = () => {
                       </p>
                       <span className="flex items-center gap-3">
                         <span className="font-medium text-heading-5 text-red">
-                          $699
+                          ${bannerfield.original_price}
                         </span>
                         <span className="font-medium text-2xl text-dark-4 line-through">
-                          $999
+                          ${bannerfield.discounted_price}
                         </span>
                       </span>
                     </div>
@@ -49,7 +88,7 @@ const Hero = () => {
 
                   <div>
                     <Image
-                      src="/images/hero/hero-02.png"
+                      src={bannerfield.image}
                       alt="mobile image"
                       width={123}
                       height={161}
@@ -57,40 +96,8 @@ const Hero = () => {
                   </div>
                 </div>
               </div>
-              <div className="w-full relative rounded-[10px] bg-white p-4 sm:p-7.5">
-                <div className="flex items-center gap-14">
-                  <div>
-                    <h2 className="max-w-[153px] font-semibold text-dark text-xl mb-20">
-                      <a href="#"> Wireless Headphone </a>
-                    </h2>
+                ))}
 
-                    <div>
-                      <p className="font-medium text-dark-4 text-custom-sm mb-1.5">
-                        limited time offer
-                      </p>
-                      <span className="flex items-center gap-3">
-                        <span className="font-medium text-heading-5 text-red">
-                          $699
-                        </span>
-                        <span className="font-medium text-2xl text-dark-4 line-through">
-                          $999
-                        </span>
-                      </span>
-                    </div>
-                  </div>
-
-                  <div>
-                    <Image
-                      src="/images/hero/hero-01.png"
-                      alt="mobile image"
-                      width={123}
-                      height={161}
-                    />
-                  </div>
-                </div>
-              </div>
-
-              
             </div>
           </div>
         </div>
