@@ -16,6 +16,7 @@ const Categories = () => {
         const appPassword = "SA0Y2M849pllyAxOYRuuyQyU";
 
         const auth = "Basic " + btoa(`${username}:${appPassword}`);
+       
 
         const res = await fetch(
           "http://localhost/next-woo-backend/wp-json/wc/v3/products/categories",
@@ -25,6 +26,7 @@ const Categories = () => {
             },
           }
         );
+        
 
         const text = await res.text(); // first get raw text
 
