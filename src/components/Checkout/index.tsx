@@ -2,7 +2,7 @@
 import React from "react";
 
 import { useAppSelector } from "@/redux/store";
-import { RootState } from "@/redux/store"; 
+import { RootState } from "@/redux/store";
 import { selectCartItems, selectTotalPrice } from "@/redux/features/cart-slice";
 import Breadcrumb from "../Common/Breadcrumb";
 import Login from "./Login";
@@ -15,6 +15,61 @@ import Billing from "./Billing";
 const Checkout = () => {
   const cartItems = useAppSelector((state) => selectCartItems(state));
   const totalPrice = useAppSelector((state) => selectTotalPrice(state));
+
+  const handlePlaceOrder = async (e: React.FormEvent) => {
+    e.preventDefault(); // stops form from refreshing page
+
+    const orderData = {
+  payment_method: "cod",
+  payment_method_title: "Cash on Delivery",
+  set_paid: false,
+  billing: {
+    first_name: "John",
+    last_name: "Doe",
+    address_1: "Some Street",
+    city: "New York",
+    country: "US",
+    email: "john@example.com",
+    phone: "9999999999",
+  },
+  shipping: {
+    first_name: "John",
+    last_name: "Doe",
+    address_1: "Some Street",
+    city: "New York",
+    country: "US",
+  },
+  line_items: [
+    { product_id: 81, quantity: 1 }, 
+  ],
+};
+
+    try {
+      const username = "admin";
+      const appPassword = "SA0Y2M849pllyAxOYRuuyQyU";
+
+      const auth = "Basic " + btoa(`${username}:${appPassword}`);
+
+      const res = await fetch(
+        "http://localhost/next-woo-backend/wp-json/wc/v3/orders",
+        {
+          method: "POST",
+          headers: {
+            Authorization: auth,
+          },
+          body: JSON.stringify(orderData),
+        }
+      );
+
+      const data = await res.json();
+      
+      console.log("✅ Order placed:", data);
+      alert("Order placed successfully!");
+    } catch (error) {
+      console.error("❌ Error placing order:", error);
+      alert("Failed to place order.");
+    }
+  };
   return (
     <>
       <Breadcrumb title={"Checkout"} pages={["checkout"]} />
@@ -74,7 +129,7 @@ const Checkout = () => {
                       </div>
                     </div>
 
-                      {cartItems.map((item) => (
+                    {cartItems.map((item) => (
                       <div
                         key={item.id}
                         className="flex items-center justify-between py-5 border-b border-gray-3"
@@ -114,6 +169,7 @@ const Checkout = () => {
                 {/* <!-- checkout button --> */}
                 <button
                   type="submit"
+                  onClick={handlePlaceOrder}
                   className="w-full flex justify-center font-medium text-white bg-blue py-3 px-6 rounded-md ease-out duration-200 hover:bg-blue-dark mt-7.5"
                 >
                   Place Order
