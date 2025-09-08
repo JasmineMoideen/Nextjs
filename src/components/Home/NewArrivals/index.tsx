@@ -4,8 +4,23 @@ import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import ProductItem from "@/components/Common/ProductItem";
 
+import { Product } from "@/types/product";
+
 const NewArrival = () => {
-  const [products, setProducts] = useState([]);
+  const [products, setProducts] = useState<Product[]>([]);
+
+  function mapWooProductToProduct(apiProduct: any): Product {
+    return {
+      id: apiProduct.id,
+      title: apiProduct.name, // 👈 should map correctly
+      reviews: apiProduct.rating_count,
+      price: Number(apiProduct.regular_price),
+      discountedPrice: apiProduct.sale_price
+        ? Number(apiProduct.sale_price)
+        : Number(apiProduct.regular_price),
+      images: apiProduct.images,
+    };
+  }
 
   useEffect(() => {
     const fetchNewArrivals = async () => {
@@ -14,7 +29,7 @@ const NewArrival = () => {
         const appPassword = "SA0Y2M849pllyAxOYRuuyQyU";
 
         const auth = "Basic " + btoa(`${username}:${appPassword}`);
-        console.log("auth is", auth);
+
         const response = await fetch(
           "http://localhost/next-woo-backend/wp-json/wc/v3/products?tag=30",
           {
@@ -23,19 +38,17 @@ const NewArrival = () => {
             },
           }
         );
-        
+
         if (!response.ok) throw new Error("Failed to fetch products");
 
         const data = await response.json();
-        console.log("data is",data);
-        setProducts(data);
+        setProducts(data.map(mapWooProductToProduct));
       } catch (error) {
         console.error("Error fetching new arrivals:", error);
       }
     };
 
     fetchNewArrivals();
-    
   }, []);
 
   return (
@@ -62,9 +75,7 @@ const NewArrival = () => {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-7.5 gap-y-9">
           {products.length > 0 ? (
-            products.map((item: any) => (
-              <ProductItem key={item.id} item={item} />
-            ))
+            products.map((item) => <ProductItem key={item.id} item={item} />)
           ) : (
             <p className="text-red-500">⚠️ No new arrivals found</p>
           )}

@@ -37,7 +37,18 @@ const SingleItem = ({ item }) => {
         <div className="flex items-center justify-between gap-5">
           <div className="w-full flex items-center gap-5.5">
             <div className="flex items-center justify-center rounded-[5px] bg-gray-2 max-w-[80px] w-full h-17.5">
-              <Image width={200} height={200} src={item.imgs?.thumbnails[0]} alt="product" />
+            {item.images?.[0]?.src ? (
+                <Image
+                  width={200}
+                  height={200}
+                  src={item.images[0].src}
+                  alt={item.title || "product"}
+                />
+              ) : (
+                <div className="w-[200px] h-[200px] flex items-center justify-center bg-gray-200 text-gray-500">
+                  No Image
+                </div>
+              )}
             </div>
 
             <div>
