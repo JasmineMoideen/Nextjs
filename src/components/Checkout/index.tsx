@@ -15,35 +15,35 @@ import Billing from "./Billing";
 const Checkout = () => {
   const cartItems = useAppSelector((state) => selectCartItems(state));
   const totalPrice = useAppSelector((state) => selectTotalPrice(state));
+  const billing = useAppSelector((state) => state.checkoutReducer.billing);
 
   const handlePlaceOrder = async (e: React.FormEvent) => {
-    e.preventDefault(); // stops form from refreshing page
+    e.preventDefault();
+    const lineItems = cartItems.map((item) => ({
+      product_id: item.id,
+      quantity: item.quantity,
+    }));
 
     const orderData = {
-  payment_method: "cod",
-  payment_method_title: "Cash on Delivery",
-  set_paid: false,
-  billing: {
-    first_name: "John",
-    last_name: "Doe",
-    address_1: "Some Street",
-    city: "New York",
-    country: "US",
-    email: "john@example.com",
-    phone: "9999999999",
+      payment_method: "cod",
+      payment_method_title: "Cash on Delivery",
+      set_paid: false,
+      billing: {
+    ...billing,
+    email: billing.email || "test@example.com",
+    phone: billing.phone || "9999999999",
+    country: billing.country || "IN",
   },
-  shipping: {
-    first_name: "John",
-    last_name: "Doe",
-    address_1: "Some Street",
-    city: "New York",
-    country: "US",
-  },
-  line_items: [
-    { product_id: 81, quantity: 1 }, 
-  ],
-};
-
+      shipping: {
+        first_name: "John",
+        last_name: "Doe",
+        address_1: "Some Street",
+        city: "New York",
+        country: "US",
+      },
+      line_items: lineItems,
+    };
+       console.log("🚀 Sending orderData:", orderData);
     try {
       const username = "admin";
       const appPassword = "SA0Y2M849pllyAxOYRuuyQyU";
@@ -56,13 +56,14 @@ const Checkout = () => {
           method: "POST",
           headers: {
             Authorization: auth,
+            "Content-Type": "application/json", // <-- required
           },
           body: JSON.stringify(orderData),
         }
       );
 
       const data = await res.json();
-      
+
       console.log("✅ Order placed:", data);
       alert("Order placed successfully!");
     } catch (error) {
