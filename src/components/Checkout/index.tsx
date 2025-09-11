@@ -11,11 +11,14 @@ import ShippingMethod from "./ShippingMethod";
 import PaymentMethod from "./PaymentMethod";
 import Coupon from "./Coupon";
 import Billing from "./Billing";
+import Notes from "./Notes";
 
 const Checkout = () => {
   const cartItems = useAppSelector((state) => selectCartItems(state));
   const totalPrice = useAppSelector((state) => selectTotalPrice(state));
   const billing = useAppSelector((state) => state.checkoutReducer.billing);
+  const shipping = useAppSelector((state) => state.checkoutReducer.shipping);
+  const notes = useAppSelector((state) => state.checkoutReducer.notes);
 
   const handlePlaceOrder = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -35,15 +38,14 @@ const Checkout = () => {
     country: billing.country || "IN",
   },
       shipping: {
-        first_name: "John",
-        last_name: "Doe",
-        address_1: "Some Street",
-        city: "New York",
-        country: "US",
+        ...shipping,
+
       },
+      customer_note: notes || "",   
+      
       line_items: lineItems,
     };
-       console.log("🚀 Sending orderData:", orderData);
+      
     try {
       const username = "admin";
       const appPassword = "SA0Y2M849pllyAxOYRuuyQyU";
@@ -64,10 +66,10 @@ const Checkout = () => {
 
       const data = await res.json();
 
-      console.log("✅ Order placed:", data);
+   
       alert("Order placed successfully!");
     } catch (error) {
-      console.error("❌ Error placing order:", error);
+     
       alert("Failed to place order.");
     }
   };
@@ -90,7 +92,7 @@ const Checkout = () => {
                 <Shipping />
 
                 {/* <!-- others note box --> */}
-                <div className="bg-white shadow-1 rounded-[10px] p-4 sm:p-8.5 mt-7.5">
+                {/* <div className="bg-white shadow-1 rounded-[10px] p-4 sm:p-8.5 mt-7.5">
                   <div>
                     <label htmlFor="notes" className="block mb-2.5">
                       Other Notes (optional)
@@ -104,7 +106,8 @@ const Checkout = () => {
                       className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full p-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
                     ></textarea>
                   </div>
-                </div>
+                </div> */}
+                <Notes/>
               </div>
 
               {/* // <!-- checkout right --> */}

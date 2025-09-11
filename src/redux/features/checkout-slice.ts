@@ -12,8 +12,7 @@ interface Billing {
 }
 
 interface Shipping {
-  first_name: string;
-  last_name: string;
+
   address_1: string;
   city: string;
   country: string;
@@ -36,8 +35,7 @@ const initialState: CheckoutState = {
     phone: "",
   },
   shipping: {
-    first_name: "",
-    last_name: "",
+ 
     address_1: "",
     city: "",
     country: "",
