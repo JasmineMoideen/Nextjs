@@ -22,6 +22,10 @@ interface CheckoutState {
   billing: Billing;
   shipping: Shipping;
   notes: string;
+  coupon:string | null;
+  discount:number;
+  subtotal:number;
+  total:number;
 }
 
 const initialState: CheckoutState = {
@@ -41,6 +45,10 @@ const initialState: CheckoutState = {
     country: "",
   },
   notes: "",
+  coupon:null,
+  discount:0,
+  subtotal:0,
+  total:0
 };
 
 const checkoutSlice = createSlice({
@@ -56,9 +64,33 @@ const checkoutSlice = createSlice({
     updateNotes(state, action: PayloadAction<string>) {
       state.notes = action.payload;
     },
+
+   
+    setCartTotals(state, action: PayloadAction<{ subtotal: number }>) {
+      state.subtotal = action.payload.subtotal;
+      state.total = state.subtotal - state.discount;
+    },
+
+    // 👉 Apply coupon
+    applyCoupon(
+      state,
+      action: PayloadAction<{ code: string; discount: number }>
+    ) {
+      state.coupon = action.payload.code;
+      state.discount = action.payload.discount;
+      state.total = state.subtotal - state.discount;
+    },
+
+    // 👉 Remove coupon
+    removeCoupon(state) {
+      state.coupon = null;
+      state.discount = 0;
+      state.total = state.subtotal;
+    },
   },
 });
 
-export const { updateBilling, updateShipping, updateNotes } =
+export const { updateBilling, updateShipping, updateNotes,setCartTotals,applyCoupon,removeCoupon,
+ } =
   checkoutSlice.actions;
 export default checkoutSlice.reducer;
