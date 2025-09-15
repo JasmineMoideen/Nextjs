@@ -1,9 +1,10 @@
 "use client";
-import React from "react";
-
+import React, { useEffect } from "react";
+import { useAppDispatch } from "@/redux/store";
 import { useAppSelector } from "@/redux/store";
 import { RootState } from "@/redux/store";
-import { selectCartItems, selectTotalPrice } from "@/redux/features/cart-slice";
+import { selectCartItems} from "@/redux/features/cart-slice";
+import { setCartTotals } from "@/redux/features/checkout-slice";
 import Breadcrumb from "../Common/Breadcrumb";
 import Login from "./Login";
 import Shipping from "./Shipping";
@@ -14,11 +15,24 @@ import Billing from "./Billing";
 import Notes from "./Notes";
 
 const Checkout = () => {
+  const dispatch = useAppDispatch();
+  // cart
   const cartItems = useAppSelector((state) => selectCartItems(state));
-  const totalPrice = useAppSelector((state) => selectTotalPrice(state));
-  const billing = useAppSelector((state) => state.checkoutReducer.billing);
-  const shipping = useAppSelector((state) => state.checkoutReducer.shipping);
-  const notes = useAppSelector((state) => state.checkoutReducer.notes);
+  
+  // checkout state
+  const { billing, shipping, notes, subtotal, discount, total, coupon } =
+    useAppSelector((state: RootState) => state.checkoutReducer);
+
+  // ✅ sync cart subtotal into checkout state
+  useEffect(() => {
+    if (cartItems.length > 0) {
+      const subtotal = cartItems.reduce(
+        (acc, item) => acc + item.discountedPrice * item.quantity,
+        0
+      );
+      dispatch(setCartTotals({ subtotal }));
+    }
+  }, [cartItems, dispatch]);
 
   const handlePlaceOrder = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -32,20 +46,20 @@ const Checkout = () => {
       payment_method_title: "Cash on Delivery",
       set_paid: false,
       billing: {
-    ...billing,
-    email: billing.email || "test@example.com",
-    phone: billing.phone || "9999999999",
-    country: billing.country || "IN",
-  },
+        ...billing,
+        email: billing.email || "test@example.com",
+        phone: billing.phone || "9999999999",
+        country: billing.country || "IN",
+      },
       shipping: {
         ...shipping,
-
       },
-      customer_note: notes || "",   
-      
+      customer_note: notes || "",
+
       line_items: lineItems,
+      coupon_lines: coupon ? [{ code: coupon }] : [],
     };
-      
+
     try {
       const username = "admin";
       const appPassword = "SA0Y2M849pllyAxOYRuuyQyU";
@@ -66,10 +80,8 @@ const Checkout = () => {
 
       const data = await res.json();
 
-   
       alert("Order placed successfully!");
     } catch (error) {
-     
       alert("Failed to place order.");
     }
   };
@@ -107,7 +119,7 @@ const Checkout = () => {
                     ></textarea>
                   </div>
                 </div> */}
-                <Notes/>
+                <Notes />
               </div>
 
               {/* // <!-- checkout right --> */}
@@ -147,6 +159,20 @@ const Checkout = () => {
                       </div>
                     ))}
 
+                    {/* ✅ Subtotal */}
+                    <div className="flex items-center justify-between pt-5">
+                      <p className="text-dark">Subtotal</p>
+                      <p className="text-dark text-right">₹{subtotal}</p>
+                    </div>
+
+                    {/* ✅ Discount */}
+                    {discount > 0 && (
+                      <div className="flex items-center justify-between pt-5 text-green-600">
+                        <p>Coupon ({coupon})</p>
+                        <p>-₹{discount}</p>
+                      </div>
+                    )}
+
                     {/* <!-- total --> */}
                     <div className="flex items-center justify-between pt-5">
                       <div>
@@ -154,7 +180,7 @@ const Checkout = () => {
                       </div>
                       <div>
                         <p className="font-medium text-lg text-dark text-right">
-                          ₹{totalPrice}
+                          ₹{total}
                         </p>
                       </div>
                     </div>

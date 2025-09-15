@@ -19,14 +19,17 @@ const Coupon = () => {
     setLoading(true);
     try {
       const username = "admin";
-        const appPassword = "SA0Y2M849pllyAxOYRuuyQyU";
+      const appPassword = "SA0Y2M849pllyAxOYRuuyQyU";
 
-        const auth = "Basic " + btoa(`${username}:${appPassword}`);
-      const res = await fetch(`http://localhost/next-woo-backend/wp-json/wc/v3/coupons?code=${inputCode}`, {
-        headers: {
-              Authorization: auth,
-            },
-      });
+      const auth = "Basic " + btoa(`${username}:${appPassword}`);
+      const res = await fetch(
+        `http://localhost/next-woo-backend/wp-json/wc/v3/coupons?code=${inputCode}`,
+        {
+          headers: {
+            Authorization: auth,
+          },
+        }
+      );
 
       const data = await res.json();
 
@@ -44,6 +47,9 @@ const Coupon = () => {
 
         // prevent negative total
         if (discountAmount > subtotal) discountAmount = subtotal;
+
+        console.log("Subtotal:", subtotal);
+        console.log("Calculated discount:", discountAmount);
 
         dispatch(applyCoupon({ code: inputCode, discount: discountAmount }));
       } else {
